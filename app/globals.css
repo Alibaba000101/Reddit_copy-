@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #1a1a1b;
+    color: #d7dadc;
+    line-height: 1.4;
+}
+
+.posts-section {
+    display: flex;
+    flex-direction: column;
+}
+
+#posts-container {
+    background-color: #272729;
+    border: 1px solid #474748;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    min-height: 200px;
+    padding: 16px;
+    color: #818384;
+    font-style: italic;
+}
+
+.header {
+    background-color: #1a1a1b;
+    border-bottom: 1px solid #343536;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 48px;
+}
+
+.logo h1 {
+    color: #ff4500;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.user-section {
+    display: flex;
+    gap: 8px;
+}
+
+.login-btn, .signup-btn {
+    padding: 4px 16px;
+    border: 1px solid #cc7a00;
+    border-radius: 12px;
+    background: transparent;
+    color: #cc7a00;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.signup-btn {
+    background-color: #cc7a00;
+    color: white;
+}
+
+.login-btn:hover {
+    background-color: #cc7a00;
+    color: white;
+}
+
+.signup-btn:hover {
+    background-color: #b36b00;
+}
+
+.main-content {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 312px;
+    gap: 24px;
+}
+
+.sort-bar {
+    background-color: #272729;
+    border: 1px solid #474748;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+}
+
+.sort-btn {
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 12px;
+    color: #818384;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sort-btn.active, .sort-btn:hover {
+    background-color: #cc7a00;
+    color: white;
+}
+
+.post {
+    background-color: #272729;
+    border: 1px solid #474748;
+    border-top: none;
+    display: flex;
+    padding: 8px;
+    transition: box-shadow 0.2s;
+}
+
+.post:hover {
+    border-color: #646466;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.post:last-child {
+    border-radius: 0 0 12px 12px;
+}
+
+.vote-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 8px;
+    min-width: 40px;
+}
+
+.vote-btn {
+    background: none;
+    border: none;
+    color: #818384;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.vote-btn:hover {
+    background-color: #343536;
+}
+
+.upvote:hover {
+    color: #ff4500;
+}
+
+.downvote:hover {
+    color: #7193ff;
+}
+
+.vote-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #d7dadc;
+    margin: 2px 0;
+}
+
+.post-content {
+    flex: 1;
+    padding: 8px 8px 8px 0;
+}
+
+.post-header {
+    font-size: 12px;
+    color: #818384;
+    margin-bottom: 8px;
+}
+
+.subreddit {
+    font-weight: 700;
+    color: #d7dadc;
+}
+
+.username {
+    margin-left: 4px;
+}
+
+.timestamp {
+    margin-left: 4px;
+}
+
+.post-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: #d7dadc;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    cursor: pointer;
+}
+
+.post-title:hover {
+    color: #cc7a00;
+}
+
+.post-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #818384;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background-color: #343536;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.trending-communities, .popular-posts {
+    background-color: #272729;
+    border: 1px solid #474748;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.trending-communities h3, .popular-posts h3 {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #818384;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+#trending-container, #popular-container {
+    min-height: 60px;
+    color: #818384;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.community-item, .popular-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #474748;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.community-item:last-child, .popular-item:last-child {
+    border-bottom: none;
+}
+
+.community-name {
+    font-weight: 500;
+    color: #cc7a00;
+    cursor: pointer;
+}
+
+.member-count {
+    font-size: 12px;
+    color: #818384;
+}
+
+.popular-title {
+    font-size: 12px;
+    color: #d7dadc;
+    cursor: pointer;
+}
+
+.popular-sub {
+    font-size: 10px;
+    color: #818384;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        order: -1;
+    }
+
+    .header-content {
+        padding: 0 16px;
+    }
+
+    .main-content {
+        padding: 0 16px;
+    }
+}
