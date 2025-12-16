@@ -2,318 +2,1001 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * ============================================
+ * WorldPost - RUGGED DESIGN SYSTEM
+ * ============================================
+ *
+ * Design Philosophy: Old newspaper feel, bulletin board aesthetic,
+ * vintage forum vibes. Raw, gritty, and organic.
+ *
+ * NOT: Polished startup aesthetic
+ * YES: Rough-around-the-edges community site
+ * ============================================
+ */
+
+/* ===== CSS VARIABLES - DARK GREEN PALETTE ===== */
+:root {
+  /*
+   * RUGGED BACKGROUND COLORS
+   * Using darker, muted tones instead of pure whites
+   * Creates that worn paper/aged bulletin board feel
+   */
+  --bg-primary: #1a1f1a;           /* Dark forest backdrop */
+  --bg-secondary: #232823;         /* Slightly lighter for depth */
+  --bg-card: #252b25;              /* Card surfaces - like aged paper */
+  --bg-hover: #2d352d;             /* Subtle hover lift */
+  --bg-vote: #1e241e;              /* Vote section - recessed look */
+  --bg-input: #1a1f1a;             /* Input fields */
+
+  /*
+   * RUGGED BORDER COLORS
+   * Slightly visible borders give that "cut out" newspaper feel
+   */
+  --border-color: #3a4a3a;         /* Main borders - visible but not harsh */
+  --border-light: #2f3f2f;         /* Subtle dividers */
+  --border-rough: #4a5a4a;         /* Emphasized borders for cards */
+
+  /*
+   * BRAND COLORS - EARTHY GREENS
+   * Forest/military green tones for that rugged outdoor vibe
+   */
+  --brand-primary: #4a7c4a;        /* Main accent - forest green */
+  --brand-primary-hover: #5a8c5a;  /* Hover state */
+  --brand-dark: #2d4a2d;           /* Darker accent */
+  --brand-muted: #3d5a3d;          /* Muted green for subtle accents */
+
+  /*
+   * TEXT COLORS
+   * Slightly warm/sepia tones like aged newsprint
+   */
+  --text-primary: #d4d8c8;         /* Main text - warm off-white */
+  --text-secondary: #a8b098;       /* Secondary - greenish gray */
+  --text-muted: #7a8a70;           /* Muted - like faded ink */
+  --text-light: #5a6a50;           /* Very muted */
+  --text-accent: #8fbc8f;          /* Accent text - sage green */
+
+  /*
+   * VOTE COLORS
+   * Keeping functional but with earthy tones
+   */
+  --upvote: #6b8e23;               /* Olive green upvote */
+  --upvote-bg: rgba(107, 142, 35, 0.15);
+  --downvote: #8b4513;             /* Saddle brown downvote */
+  --downvote-bg: rgba(139, 69, 19, 0.15);
+
+  /*
+   * RUGGED SHADOWS
+   * Deeper, rougher shadows for that physical/tactile feel
+   * Cards should feel like they're pinned to a corkboard
+   */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+
+  /*
+   * TEXTURE OVERLAY
+   * Subtle noise/grain for that rough paper texture
+   */
+  --noise-opacity: 0.03;
+}
+
+/* ===== BASE STYLES ===== */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+/*
+ * RUGGED FONT STACK
+ * System fonts but prioritizing ones with more character
+ * Georgia/Times for that newspaper feel, fallback to system
+ */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #1a1a1b;
-    color: #d7dadc;
-    line-height: 1.4;
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.65;
+  min-height: 100vh;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+
+  /*
+   * RUGGED TEXTURE OVERLAY
+   * Adds subtle grain/noise to the entire page
+   * Creates that rough paper/bulletin board texture
+   */
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
 }
 
-.posts-section {
-    display: flex;
-    flex-direction: column;
+/*
+ * RUGGED SCROLLBAR
+ * Chunkier, more tactile scrollbar
+ */
+::-webkit-scrollbar {
+  width: 12px;
 }
 
-#posts-container {
-    background-color: #272729;
-    border: 1px solid #474748;
-    border-top: none;
-    border-radius: 0 0 12px 12px;
-    min-height: 200px;
-    padding: 16px;
-    color: #818384;
-    font-style: italic;
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
 }
 
-.header {
-    background-color: #1a1a1b;
-    border-bottom: 1px solid #343536;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+::-webkit-scrollbar-thumb {
+  background: var(--border-rough);
+  border: 2px solid var(--bg-secondary);
+  border-radius: 2px; /* Slightly rough edges, not perfectly round */
 }
 
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    height: 48px;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-muted);
 }
 
-.logo h1 {
-    color: #ff4500;
-    font-size: 20px;
-    font-weight: bold;
+/* ===== POST CARD STYLES ===== */
+/*
+ * RUGGED CARD DESIGN
+ * Cards feel like clippings pinned to a board
+ * Visible borders, deeper shadows, rough edges
+ */
+.post-card {
+  display: flex;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
+  /* Slightly imperfect border radius - not too smooth */
+  border-radius: 3px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--shadow-md);
+  /* Subtle texture on cards */
+  position: relative;
 }
 
-.user-section {
-    display: flex;
-    gap: 8px;
+/*
+ * RUGGED HOVER STATE
+ * Cards lift up slightly like physical objects
+ */
+.post-card:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-rough);
+  transform: translateY(-2px);
 }
 
-.login-btn, .signup-btn {
-    padding: 4px 16px;
-    border: 1px solid #cc7a00;
-    border-radius: 12px;
-    background: transparent;
-    color: #cc7a00;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
+/*
+ * CARD TEXTURE OVERLAY
+ * Adds subtle noise to each card
+ */
+.post-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  mix-blend-mode: overlay;
 }
 
-.signup-btn {
-    background-color: #cc7a00;
-    color: white;
-}
-
-.login-btn:hover {
-    background-color: #cc7a00;
-    color: white;
-}
-
-.signup-btn:hover {
-    background-color: #b36b00;
-}
-
-.main-content {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 20px;
-}
-
-.container {
-    display: grid;
-    grid-template-columns: 1fr 312px;
-    gap: 24px;
-}
-
-.sort-bar {
-    background-color: #272729;
-    border: 1px solid #474748;
-    border-radius: 12px 12px 0 0;
-    padding: 12px 16px;
-    display: flex;
-    gap: 8px;
-}
-
-.sort-btn {
-    background: none;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 12px;
-    color: #818384;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.sort-btn.active, .sort-btn:hover {
-    background-color: #cc7a00;
-    color: white;
-}
-
-.post {
-    background-color: #272729;
-    border: 1px solid #474748;
-    border-top: none;
-    display: flex;
-    padding: 8px;
-    transition: box-shadow 0.2s;
-}
-
-.post:hover {
-    border-color: #646466;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.post:last-child {
-    border-radius: 0 0 12px 12px;
-}
-
+/* Vote section - recessed look */
 .vote-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 4px 8px;
-    min-width: 40px;
-}
-
-.vote-btn {
-    background: none;
-    border: none;
-    color: #818384;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 2px;
-    border-radius: 8px;
-    transition: all 0.2s;
-}
-
-.vote-btn:hover {
-    background-color: #343536;
-}
-
-.upvote:hover {
-    color: #ff4500;
-}
-
-.downvote:hover {
-    color: #7193ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 14px 10px;
+  background-color: var(--bg-vote);
+  min-width: 52px;
+  gap: 2px;
+  /* Inset shadow for recessed look */
+  box-shadow: var(--shadow-inset);
+  border-right: 1px solid var(--border-light);
 }
 
 .vote-count {
-    font-size: 12px;
-    font-weight: 700;
-    color: #d7dadc;
-    margin: 2px 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+  padding: 4px 0;
+  min-width: 32px;
+  text-align: center;
+  /* Slightly rough font rendering */
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
+.vote-count.upvoted {
+  color: var(--upvote);
+}
+
+.vote-count.downvoted {
+  color: var(--downvote);
+}
+
+/* Post content section */
 .post-content {
-    flex: 1;
-    padding: 8px 8px 8px 0;
+  flex: 1;
+  padding: 16px 18px;
+  min-width: 0;
 }
 
-.post-header {
-    font-size: 12px;
-    color: #818384;
-    margin-bottom: 8px;
+.post-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  /* Slight letter spacing for that printed look */
+  letter-spacing: 0.02em;
 }
 
-.subreddit {
-    font-weight: 700;
-    color: #d7dadc;
+.post-meta .subreddit {
+  color: var(--text-accent);
+  font-weight: 700;
+  text-transform: lowercase;
 }
 
-.username {
-    margin-left: 4px;
+.post-meta .subreddit:hover {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 2px;
+  cursor: pointer;
 }
 
-.timestamp {
-    margin-left: 4px;
-}
-
+/*
+ * POST TITLES
+ * Bold, newspaper headline style
+ */
 .post-title {
-    font-size: 18px;
-    font-weight: 500;
-    color: #d7dadc;
-    margin-bottom: 8px;
-    line-height: 1.3;
-    cursor: pointer;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.35;
+  margin-bottom: 10px;
+  cursor: pointer;
+  /* Newspaper headline feel */
+  letter-spacing: -0.01em;
 }
 
 .post-title:hover {
-    color: #cc7a00;
+  color: var(--brand-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
+.post-preview {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Post actions */
 .post-actions {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 10px;
+  /* Divider line above actions */
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-light);
 }
 
+/*
+ * ACTION BUTTONS
+ * More tactile, slightly 3D appearance
+ */
 .action-btn {
-    background: none;
-    border: none;
-    padding: 4px 8px;
-    font-size: 12px;
-    color: #818384;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .action-btn:hover {
-    background-color: #343536;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
 }
 
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== VOTE BUTTONS ===== */
+/*
+ * RUGGED VOTE BUTTONS
+ * More chunky and tactile
+ */
+.vote-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 2px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.vote-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-color);
+}
+
+.vote-btn.upvote:hover,
+.vote-btn.upvoted {
+  color: var(--upvote);
+  background-color: var(--upvote-bg);
+  border-color: var(--upvote);
+}
+
+.vote-btn.downvote:hover,
+.vote-btn.downvoted {
+  color: var(--downvote);
+  background-color: var(--downvote-bg);
+  border-color: var(--downvote);
+}
+
+.vote-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ===== CARD STYLES ===== */
+.card {
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  box-shadow: var(--shadow-md);
+}
+
+.card:hover {
+  border-color: var(--border-rough);
+}
+
+/* ===== SORT BAR ===== */
+/*
+ * SORT BAR - Toolbar aesthetic
+ * Like a worn wooden toolbar on a bulletin board
+ */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+/*
+ * SORT BUTTONS
+ * Chunky, tactile buttons
+ */
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sort-btn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.sort-btn.active {
+  background-color: var(--brand-dark);
+  color: var(--text-primary);
+  border-color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.sort-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== BUTTON STYLES ===== */
+
+/*
+ * PRIMARY BUTTON - RUGGED STYLE
+ * More tactile, 3D appearance with rougher edges
+ * Like a stamped or embossed button
+ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background-color: var(--brand-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  /* Less rounded - more angular/rugged */
+  border-radius: 3px;
+  border: 2px solid var(--brand-dark);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  /* 3D tactile effect */
+  box-shadow:
+    0 3px 0 var(--brand-dark),
+    0 4px 6px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 0 var(--brand-dark),
+    0 6px 10px rgba(0, 0, 0, 0.35);
+}
+
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 var(--brand-dark),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/*
+ * SECONDARY BUTTON - OUTLINED RUGGED STYLE
+ */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border: 2px solid var(--brand-primary);
+  color: var(--brand-primary);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-secondary:hover {
+  background-color: var(--brand-dark);
+  color: var(--text-primary);
+  border-color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Ghost button */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* ===== HEADER STYLES ===== */
+/*
+ * RUGGED HEADER
+ * Like a worn wooden sign or banner
+ */
+.header {
+  background-color: var(--bg-card);
+  border-bottom: 3px solid var(--border-rough);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  /* Slight texture */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 60px;
+}
+
+/*
+ * LOGO - RUGGED STAMP STYLE
+ * Like a rubber stamp or embossed badge
+ */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--brand-primary);
+  /* Square with slightly rough corners */
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--brand-dark);
+  box-shadow:
+    0 2px 0 var(--brand-dark),
+    0 3px 6px rgba(0, 0, 0, 0.3);
+  /* Rotation for organic feel */
+  transform: rotate(-2deg);
+}
+
+.logo-icon span {
+  color: #fff;
+  font-weight: 900;
+  font-size: 22px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  /* Counter-rotate text */
+  transform: rotate(2deg);
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--brand-primary);
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  /* Slight tilt for organic feel */
+  transform: rotate(-0.5deg);
+}
+
+/*
+ * SEARCH BAR - RUGGED INPUT
+ * Like a worn paper input field
+ */
+.search-bar {
+  flex: 1;
+  max-width: 480px;
+  margin: 0 24px;
+  position: relative;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 11px 16px 11px 44px;
+  background-color: var(--bg-input);
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-inset);
+}
+
+.search-bar input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  background-color: var(--bg-secondary);
+  box-shadow: 0 0 0 3px rgba(74, 124, 74, 0.2);
+}
+
+.search-bar svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+/* Auth buttons */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== SIDEBAR STYLES ===== */
 .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  position: sticky;
+  top: 80px;
 }
 
-.trending-communities, .popular-posts {
-    background-color: #272729;
-    border: 1px solid #474748;
-    border-radius: 12px;
-    padding: 12px;
+/*
+ * SIDEBAR CARDS
+ * Like pinned notices on a bulletin board
+ */
+.sidebar-card {
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-md);
+  /* Slight rotation for organic pinned look */
+  transform: rotate(0.3deg);
 }
 
-.trending-communities h3, .popular-posts h3 {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #818384;
-    margin-bottom: 12px;
-    letter-spacing: 0.5px;
+.sidebar-card:nth-child(even) {
+  transform: rotate(-0.3deg);
 }
 
-#trending-container, #popular-container {
-    min-height: 60px;
-    color: #818384;
-    font-style: italic;
-    font-size: 12px;
+/*
+ * SIDEBAR HEADER
+ * Like a label or tag on a folder
+ */
+.sidebar-header {
+  padding: 12px 16px;
+  background-color: var(--brand-primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 2px solid var(--brand-dark);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.community-item, .popular-item {
-    padding: 8px 0;
-    border-bottom: 1px solid #474748;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.sidebar-content {
+  padding: 14px 16px;
 }
 
-.community-item:last-child, .popular-item:last-child {
-    border-bottom: none;
+.community-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.community-item:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-light);
+}
+
+.community-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.community-rank {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-muted);
+  min-width: 20px;
+}
+
+.community-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .community-name {
-    font-weight: 500;
-    color: #cc7a00;
-    cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.member-count {
-    font-size: 12px;
-    color: #818384;
+.community-members {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
-.popular-title {
-    font-size: 12px;
-    color: #d7dadc;
-    cursor: pointer;
+/* Popular posts in sidebar */
+.popular-post {
+  padding: 12px 0;
+  /* Dashed border for that rough/cut look */
+  border-bottom: 1px dashed var(--border-light);
+  cursor: pointer;
 }
 
-.popular-sub {
-    font-size: 10px;
-    color: #818384;
+.popular-post:last-child {
+  border-bottom: none;
+}
+
+.popular-post:hover .popular-post-title {
+  color: var(--brand-primary);
+  text-decoration: underline;
+}
+
+.popular-post-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.45;
+  margin-bottom: 6px;
+  transition: color 0.15s ease;
+}
+
+.popular-post-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.popular-post-votes {
+  color: var(--upvote);
+  font-weight: 700;
+}
+
+/* ===== LINKS ===== */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ===== FORM ELEMENTS ===== */
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.text-green {
+  color: var(--brand-primary);
+}
+
+.text-accent {
+  color: var(--text-accent);
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== CONTAINER ===== */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.content-layout {
+  display: flex;
+  gap: 28px;
+}
+
+.posts-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  /* Slightly irregular gap for organic feel */
+  gap: 18px;
+}
+
+.sidebar-column {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .sidebar-column {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
-    .container {
-        grid-template-columns: 1fr;
-    }
+  .search-bar {
+    display: none;
+  }
 
-    .sidebar {
-        order: -1;
-    }
+  .main-container {
+    padding: 14px 12px;
+  }
 
-    .header-content {
-        padding: 0 16px;
-    }
+  .posts-list {
+    gap: 14px;
+  }
 
-    .main-content {
-        padding: 0 16px;
-    }
+  .post-title {
+    font-size: 17px;
+  }
+
+  .post-preview {
+    font-size: 14px;
+  }
+
+  .header-content {
+    height: 54px;
+  }
+
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .logo-text {
+    font-size: 20px;
+  }
 }
+
+/* ===== LOADING, ERROR, AND EMPTY STATES ===== */
+/*
+ * These states provide feedback while data is loading
+ * or when something goes wrong
+ */
+
+/* Common state container styling */
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  box-shadow: var(--shadow-md);
+}
+
+/* Loading state */
+.loading-state p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+/* Loading spinner - animated rotation */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error state */
+.error-state {
+  border-color: var(--downvote);
+}
+
+.error-state p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.error-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--downvote);
+  margin-bottom: 12px;
+}
+
+/* Empty state */
+.empty-state p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/*
+ * ============================================
+ * END OF RUGGED DESIGN SYSTEM
+ *
+ * Key design choices:
+ * 1. Dark green palette - forest/military aesthetic
+ * 2. Rougher border-radius (2-4px vs smooth 8-24px)
+ * 3. Visible borders - newspaper clipping feel
+ * 4. Deeper shadows - tactile/physical cards
+ * 5. Texture overlays - grain/noise for worn look
+ * 6. Slight rotations - organic bulletin board feel
+ * 7. Uppercase text - stamp/label aesthetic
+ * 8. Dashed dividers - cut/torn paper effect
+ * 9. 3D button effects - tactile/pressable
+ * 10. Muted, earthy tones - vintage forum vibe
+ * ============================================
+ */

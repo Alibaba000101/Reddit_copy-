@@ -1,11 +1,9 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
-
-const inter = Inter({ subsets: ['latin'] })
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export const metadata = {
-  title: 'Freddit - The Front Page of the Internet',
-  description: 'A simplified Reddit clone built with Next.js',
+  title: 'WorldPost - The Rugged Community Hub',
+  description: 'A raw, community-driven platform for sharing and discussing content. No polish, just real discussion.',
 }
 
 export default function RootLayout({
@@ -15,7 +13,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className="min-h-screen">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   )
 }
