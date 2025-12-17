@@ -264,15 +264,36 @@ export default function PostDetailPage() {
   const fetchComments = useCallback(async () => {
     try {
       const supabase = createClient()
-      const { data, error: fetchError } = await supabase
+
+      // Fetch comments without join
+      const { data: commentsData, error: fetchError } = await supabase
         .from('comments')
-        .select('*, profiles(username)')
+        .select('*')
         .eq('post_id', id)
         .order('created_at', { ascending: true })
 
       if (fetchError) throw fetchError
 
-      const tree = buildCommentTree(data || [])
+      // Fetch profiles for all unique author IDs
+      const authorIds = Array.from(new Set((commentsData || []).map(c => c.author_id)))
+      const profilesMap = new Map<string, Profile | null>()
+
+      for (const authorId of authorIds) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', authorId)
+          .single()
+        profilesMap.set(authorId, profile || null)
+      }
+
+      // Combine comments with profiles
+      const commentsWithProfiles = (commentsData || []).map(comment => ({
+        ...comment,
+        profiles: profilesMap.get(comment.author_id) || null
+      }))
+
+      const tree = buildCommentTree(commentsWithProfiles)
       setComments(tree)
     } catch (err) {
       console.error('Error fetching comments:', err)
@@ -367,9 +388,10 @@ export default function PostDetailPage() {
       try {
         const supabase = createClient()
 
-        const { data, error: fetchError } = await supabase
+        // Fetch post first
+        const { data: postData, error: fetchError } = await supabase
           .from('posts')
-          .select('*, profiles(username)')
+          .select('*')
           .eq('id', id)
           .single()
 
@@ -382,7 +404,18 @@ export default function PostDetailPage() {
           return
         }
 
-        setPost(data)
+        // Fetch profile separately
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', postData.author_id)
+          .single()
+
+        // Combine post with profile data
+        setPost({
+          ...postData,
+          profiles: profile || null
+        })
       } catch (err) {
         console.error('Error fetching post:', err)
         setError('Failed to load post. Please try again later.')

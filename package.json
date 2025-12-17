@@ -22,6 +22,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.9.8",
     "eslint": "^8",
     "eslint-config-next": "^15.0.0",
     "postcss": "^8.5.6",
