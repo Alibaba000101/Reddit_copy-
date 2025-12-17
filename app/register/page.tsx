@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { createClient } from '@/utils/supabase/browser-client'
 import Header from '@/components/Header'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -20,8 +22,20 @@ export default function RegisterPage() {
     setError(null)
 
     // Validation
-    if (!email || !password || !confirmPassword) {
+    if (!email || !username || !password || !confirmPassword) {
       setError('Please fill in all fields')
+      return
+    }
+
+    // Username validation
+    if (username.length < 3 || username.length > 20) {
+      setError('Username must be 3-20 characters')
+      return
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_-]+$/
+    if (!usernameRegex.test(username)) {
+      setError('Username can only contain letters, numbers, underscore, and hyphen')
       return
     }
 
@@ -37,12 +51,41 @@ export default function RegisterPage() {
 
     setLoading(true)
 
-    const { error: signUpError } = await signUp(email, password)
+    const { user, error: signUpError } = await signUp(email, password)
 
     if (signUpError) {
       setError(signUpError.message)
       setLoading(false)
       return
+    }
+
+    if (!user) {
+      setError('Registration failed. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    // Create user profile with user-chosen username
+    const supabase = createClient()
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: user.id,
+        username: username,
+      })
+
+    if (profileError) {
+      // Handle duplicate username error (code 23505 = unique violation)
+      if (profileError.code === '23505') {
+        setError('Username already taken')
+        setLoading(false)
+        return
+      } else {
+        setError('Failed to create profile: ' + profileError.message)
+        setLoading(false)
+        return
+      }
     }
 
     // Success - redirect to home
@@ -77,6 +120,19 @@ export default function RegisterPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 bg-[var(--bg-input)] border-2 border-[var(--border-color)] rounded text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]"
                     placeholder="you@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--text-secondary)] mb-2 uppercase tracking-wider">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full px-4 py-3 bg-[var(--bg-input)] border-2 border-[var(--border-color)] rounded text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)]"
+                    placeholder="3-20 characters (letters, numbers, _, -)"
                   />
                 </div>
 

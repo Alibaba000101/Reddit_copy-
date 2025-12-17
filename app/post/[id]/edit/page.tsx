@@ -1,20 +1,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { createClient } from '@/utils/supabase/browser-client'
 import Header from '@/components/Header'
 
-export default function CreatePostPage() {
+export default function EditPostPage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [removeExistingImage, setRemoveExistingImage] = useState(false)
   const router = useRouter()
+  const params = useParams()
+  const id = params.id as string
   const { user, loading: authLoading } = useAuth()
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +28,7 @@ export default function CreatePostPage() {
       setImageFile(file)
       const previewUrl = URL.createObjectURL(file)
       setImagePreview(previewUrl)
+      setRemoveExistingImage(true)
     }
   }
 
@@ -32,23 +38,47 @@ export default function CreatePostPage() {
       URL.revokeObjectURL(imagePreview)
       setImagePreview(null)
     }
+    setRemoveExistingImage(true)
   }
 
-  // Redirect to login if not authenticated
+  // Fetch existing post data
   useEffect(() => {
-    if (!authLoading && !user) {
+    async function fetchPost() {
+      try {
+        const supabase = createClient()
+        const { data, error: fetchError } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('id', id)
+          .single()
+
+        if (fetchError) {
+          throw fetchError
+        }
+
+        // Check if user is the author
+        if (user && data.author_id !== user.id) {
+          router.push('/')
+          return
+        }
+
+        setTitle(data.title)
+        setContent(data.content || '')
+        setExistingImageUrl(data.image_url || null)
+      } catch (err) {
+        console.error('Error fetching post:', err)
+        setError('Failed to load post')
+      } finally {
+        setFetching(false)
+      }
+    }
+
+    if (!authLoading && user && id) {
+      fetchPost()
+    } else if (!authLoading && !user) {
       router.push('/login')
     }
-  }, [user, authLoading, router])
-
-  // Generate a URL-friendly slug from the title
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .substring(0, 100) + '-' + Date.now()
-  }
+  }, [id, user, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,7 +90,7 @@ export default function CreatePostPage() {
     }
 
     if (!user) {
-      setError('You must be logged in to create a post')
+      setError('You must be logged in to edit a post')
       return
     }
 
@@ -68,9 +98,9 @@ export default function CreatePostPage() {
 
     try {
       const supabase = createClient()
-      let imageUrl: string | null = null
+      let imageUrl: string | null = existingImageUrl
 
-      // Upload image if selected
+      // Handle image changes
       if (imageFile) {
         setUploading(true)
         const fileExt = imageFile.name.split('.').pop()
@@ -90,34 +120,34 @@ export default function CreatePostPage() {
 
         imageUrl = urlData.publicUrl
         setUploading(false)
+      } else if (removeExistingImage) {
+        imageUrl = null
       }
 
-      const { error: insertError } = await supabase
+      const { error: updateError } = await supabase
         .from('posts')
-        .insert({
+        .update({
           title: title.trim(),
           content: content.trim() || null,
-          slug: generateSlug(title),
-          author_id: user.id,
           image_url: imageUrl,
         })
+        .eq('id', id)
 
-      if (insertError) {
-        throw insertError
+      if (updateError) {
+        throw updateError
       }
 
-      // Success - redirect to home
-      router.push('/')
+      router.push(`/posts/${id}`)
     } catch (err) {
-      console.error('Error creating post:', err)
-      setError(err instanceof Error ? err.message : 'Failed to create post. Please try again.')
+      console.error('Error updating post:', err)
+      setError(err instanceof Error ? err.message : 'Failed to update post. Please try again.')
       setLoading(false)
       setUploading(false)
     }
   }
 
-  // Show loading while checking auth
-  if (authLoading) {
+  // Show loading while checking auth or fetching post
+  if (authLoading || fetching) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -144,7 +174,7 @@ export default function CreatePostPage() {
         <div className="max-w-2xl mx-auto">
           <div className="sidebar-card" style={{ transform: 'none' }}>
             <div className="sidebar-header">
-              Create a Post
+              Edit Post
             </div>
             <div className="sidebar-content">
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -185,10 +215,10 @@ export default function CreatePostPage() {
                   <label className="block text-sm font-bold text-[var(--text-secondary)] mb-2 uppercase tracking-wider">
                     Image (optional)
                   </label>
-                  {imagePreview ? (
+                  {imagePreview || (existingImageUrl && !removeExistingImage) ? (
                     <div className="relative">
                       <img
-                        src={imagePreview}
+                        src={imagePreview || existingImageUrl || ''}
                         alt="Preview"
                         className="w-full max-h-64 object-contain rounded border-2 border-[var(--border-color)] bg-[var(--bg-input)]"
                       />
@@ -231,7 +261,7 @@ export default function CreatePostPage() {
                     disabled={loading || uploading}
                     className="btn-primary flex-1"
                   >
-                    {uploading ? 'Uploading image...' : loading ? 'Posting...' : 'Post'}
+                    {uploading ? 'Uploading image...' : loading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </form>

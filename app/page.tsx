@@ -75,16 +75,16 @@ function formatTimeAgo(dateString: string): string {
  * Transforms a database post into the format our PostCard component expects
  * This maps database field names to UI field names
  */
-function transformDatabasePost(dbPost: DatabasePost): Post {
+function transformDatabasePost(dbPost: DatabasePost, username: string): Post {
   return {
     // Direct mappings from database
     id: dbPost.id,
     title: dbPost.title,
     content: dbPost.content || undefined,  // Convert null to undefined
+    image_url: dbPost.image_url || undefined,  // Convert null to undefined
 
-    // For now, show the author_id as the author
-    // Later you can fetch the actual username from a users table
-    author: dbPost.author_id,
+    // Use the fetched username
+    author: username,
 
     // Convert the ISO timestamp to "X hours ago" format
     timestamp: formatTimeAgo(dbPost.created_at),
@@ -115,57 +115,88 @@ export default function Home() {
   // error: Stores error message if something goes wrong
   const [error, setError] = useState<string | null>(null)
 
+  // searchQuery: Current search term (empty means show all posts)
+  const [searchQuery, setSearchQuery] = useState('')
+
   // ----------------------------------------
   // DATA FETCHING
   // ----------------------------------------
 
+  // Fetch posts from database, optionally filtered by search query
+  async function fetchPosts(query: string = '') {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Create a Supabase client instance
+      const supabase = createClient()
+
+      // Build the query - simple fetch without joins for now
+      let supabaseQuery = supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      // If search query provided, filter by title (case-insensitive)
+      if (query.trim()) {
+        supabaseQuery = supabaseQuery.ilike('title', `%${query.trim()}%`)
+      }
+
+      const { data, error: fetchError } = await supabaseQuery
+
+      // If Supabase returned an error, throw it to be caught below
+      if (fetchError) {
+        throw fetchError
+      }
+
+      // Get posts array (could be null, so default to empty)
+      const postsData = data || []
+
+      // Fetch username for each post separately
+      const transformedPosts: Post[] = []
+      for (const post of postsData) {
+        // Query the profiles table for this post's author
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', post.author_id)
+          .single()
+
+        // Use username if found, otherwise 'deleted'
+        const username = profile?.username || 'deleted'
+
+        // Transform and add to array
+        transformedPosts.push(transformDatabasePost(post, username))
+      }
+
+      // Update state with the fetched posts
+      setPosts(transformedPosts)
+
+    } catch (err) {
+      // Log the full error for debugging (check browser console)
+      console.error('Error fetching posts:', err)
+
+      // Set a user-friendly error message
+      setError('Failed to load posts. Please try again later.')
+
+    } finally {
+      // This runs whether fetch succeeded or failed
+      // Stop showing the loading spinner
+      setLoading(false)
+    }
+  }
+
   // useEffect runs when the component first loads (mounts)
   // The empty array [] means it only runs once, not on every re-render
   useEffect(() => {
-    // Define an async function to fetch posts
-    // We define it inside useEffect because useEffect can't be async directly
-    async function fetchPosts() {
-      try {
-        // Create a Supabase client instance
-        const supabase = createClient()
-
-        // Fetch all posts from the "posts" table
-        // .select('*') gets all columns
-        // .order() sorts by newest first
-        const { data, error: fetchError } = await supabase
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false })
-
-        // If Supabase returned an error, throw it to be caught below
-        if (fetchError) {
-          throw fetchError
-        }
-
-        // Transform database posts to UI format
-        // data could be null, so we default to empty array
-        const transformedPosts = (data || []).map(transformDatabasePost)
-
-        // Update state with the fetched posts
-        setPosts(transformedPosts)
-
-      } catch (err) {
-        // Log the full error for debugging (check browser console)
-        console.error('Error fetching posts:', err)
-
-        // Set a user-friendly error message
-        setError('Failed to load posts. Please try again later.')
-
-      } finally {
-        // This runs whether fetch succeeded or failed
-        // Stop showing the loading spinner
-        setLoading(false)
-      }
-    }
-
-    // Call the fetch function
     fetchPosts()
   }, []) // Empty dependency array = run once on mount
+
+  // Handle search from Header component
+  function handleSearch(query: string) {
+    setSearchQuery(query)
+    fetchPosts(query)
+  }
 
   // ----------------------------------------
   // RENDER HELPERS
@@ -204,6 +235,19 @@ export default function Home() {
 
     // STATE 3: No posts exist - show empty message
     if (posts.length === 0) {
+      // Different message for search vs no posts
+      if (searchQuery.trim()) {
+        return (
+          <div className="empty-state">
+            <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p>No results found</p>
+            <p className="text-gray-400 mt-2">Try a different search term</p>
+          </div>
+        )
+      }
       return (
         <div className="empty-state">
           <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +276,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <Header onSearch={handleSearch} />
 
       <main className="main-container">
         <div className="content-layout">

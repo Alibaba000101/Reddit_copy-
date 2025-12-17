@@ -1,12 +1,30 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 
-export default function Header() {
+interface HeaderProps {
+  onSearch?: (query: string) => void
+}
+
+export default function Header({ onSearch }: HeaderProps) {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = () => {
+    if (onSearch) {
+      onSearch(searchQuery)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
 
   const handleLogout = async () => {
     await signOut()
@@ -26,7 +44,13 @@ export default function Header() {
 
         {/* Search bar */}
         <div className="search-bar">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            onClick={handleSearch}
+            style={{ cursor: 'pointer' }}
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -37,6 +61,9 @@ export default function Header() {
           <input
             type="text"
             placeholder="Search WorldPost"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </div>
 
@@ -46,6 +73,11 @@ export default function Header() {
             <div className="text-[var(--text-muted)] text-sm">Loading...</div>
           ) : user ? (
             <>
+              <Link href="/post/create">
+                <button className="btn-primary">
+                  Create Post
+                </button>
+              </Link>
               <span className="text-sm text-[var(--text-secondary)] hidden sm:block truncate max-w-[150px]">
                 {user.email}
               </span>

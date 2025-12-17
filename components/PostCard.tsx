@@ -9,6 +9,7 @@ export interface Post {
   voteCount: number
   commentCount: number
   content?: string
+  image_url?: string
 }
 
 interface PostCardProps {
@@ -71,6 +72,31 @@ export default function PostCard({ post }: PostCardProps) {
             {post.title}
           </h3>
         </Link>
+
+        {/* Post image */}
+        {post.image_url && (
+          <div className="post-image-container" style={{
+            marginTop: '12px',
+            marginBottom: '12px',
+            maxWidth: '200px',
+            maxHeight: '88px',
+            overflow: 'hidden',
+            borderRadius: '8px',
+          }}>
+            <img
+              src={post.image_url}
+              alt={post.title}
+              className="post-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                maxHeight: '88px',
+                objectFit: 'cover',
+                borderRadius: '8px',
+              }}
+            />
+          </div>
+        )}
 
         {/* Content preview */}
         {post.content && (
